@@ -27,10 +27,11 @@ pipeline {
 
         stage('Docker Run (optional test)') {
             steps {
-                 docker stop c1 || true
-                docker rm c1 || true
-                docker run -it -d --name c1 -p 9000:8080 yashb1117/project:1
-
+                sh '''
+                    docker stop c1 || true
+                    docker rm c1 || true
+                    docker run -it -d --name c1 -p 9003:8080 yashb1117/yash:1
+                '''
             }
         }
 

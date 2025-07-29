@@ -7,54 +7,47 @@ pipeline {
     }
 
     stages {
-        stage('Git checkout') {
+        stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/yashb1117/Dockersys.git'
             }
         }
+
         stage('Compile') {
             steps {
-                sh 'mvn compile'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t yashb1117/project:1 .'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Docker image scan') {
+        stage('Docker Build') {
             steps {
-                sh 'trivy image --format table -o trivy-image-report.html yashb1117/project:1'
+                sh 'docker build -t yashb1117/yash:1 .'
             }
         }
-        stage('Containersation') {
+
+        stage('Docker Run (optional test)') {
             steps {
-                sh '''
-                docker stop c1 || true
-                docker rm c1 || true
-                docker run -it -d --name c1 -p 9000:8080 yashb1117/project:1
-                '''
+                sh 'docker run -d -p 9000:8080 yashb1117/yash:1'
             }
         }
-        stage('Login to Docker Hub') {
+
+        stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )]) {
+                        sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
                     }
                 }
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Docker Push') {
             steps {
-                sh 'docker push yashb1117/project:1'
+                sh 'docker push yashb1117/yash:1'
             }
         }
     }

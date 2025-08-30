@@ -1,4 +1,4 @@
-pipeline{
+pipeline {
     agent any
 
     tools {
@@ -6,43 +6,43 @@ pipeline{
         maven 'Maven'
     }
 
-    stages{
+    stages {
         stage('Git checkout') {
             steps {
-                    git branch: 'main', url: 'https://github.com/ManojKRISHNAPPA/test-1.git'
+                git branch: 'main', url: 'https://github.com/yashb1117/Dockersys.git'
             }
         }
         stage('Compile') {
             steps {
-                    sh 'mvn compile'
-            }         
+                sh 'mvn compile'
+            }
         }
-        stage('Build'){
+        stage('Build') {
             steps {
-                    sh 'mvn clean install'
+                sh 'mvn clean install'
             }
         }
         stage('Build Docker Image') {
             steps {
-                    sh 'docker build -t manojkrishnappa/project:1 .'
+                sh 'docker build -t yashb1117/project:1 .'
             }
         }
 
-        stage('Docker image scan'){
+        stage('Docker image scan') {
             steps {
-                    sh 'trivy image --format table -o trivy-image-report.html manojkrishnappa/project:1'
+                sh 'trivy image --format table -o trivy-image-report.html yashb1117/project:1'
             }
         }
-        stage('Containersation'){
+        stage('Containersation') {
             steps {
-                    sh '''
-                    docker stop c1 || true
-                    docker rm c1 || true
-                    docker run -it -d --name c1 -p 9000:8080 manojkrishnappa/project:1
-                    '''
+                sh '''
+                docker stop c1 || true
+                docker rm c1 || true
+                docker run -it -d --name c1 -p 9000:8080 yashb1117/project:1
+                '''
             }
         }
-        stage('Login to Docker Hub'){
+        stage('Login to Docker Hub') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
@@ -54,10 +54,8 @@ pipeline{
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                sh 'docker push manojkrishnappa/project:1'
+                sh 'docker push yashb1117/project:1'
             }
-            
         }
-
     }
 }
